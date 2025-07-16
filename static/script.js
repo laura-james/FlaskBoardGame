@@ -1,10 +1,36 @@
 function checkSquare(row,col){
     input = document.getElementById("boxR"+row+"C"+col);
     console.log(input.innerText);
-    if (input.innerText=="a"){
+    input.innerText = input.innerText.slice(0, 1);//only allows user to enter one character
+    //use regex to check if its a number between 1 and 9 inclusive
+    if (!/^[1-9]$/.test(input.innerText)) {
         input.classList.add("error");
-
+    }else if (checkRow(row, col, input.innerText)){
+        input.classList.add("error");
+    }else if (checkCol(row, col, input.innerText)){
+            input.classList.add("error");
+    } else {
+        input.classList.remove("error");
     }
+}
+function checkRow(row,currentcol,value){
+    for (let col = 0; col < 9; col++) {
+        if (document.getElementById("boxR"+row+"C"+col).innerText == value && currentcol!=col) {
+            //console.log("found duplicate boxR"+row+"C"+col);
+            return true;
+        }
+    }
+    return false;
+}
+
+function checkCol(currentrow,col,value){
+    for (let row = 0; row < 9; row++) {
+        if (document.getElementById("boxR"+row+"C"+col).innerText == value && currentrow!=row) {
+            //console.log("found duplicate boxR"+row+"C"+col);
+            return true;
+        }
+    }
+    return false;
 }
 
 
