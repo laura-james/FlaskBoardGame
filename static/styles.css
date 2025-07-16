@@ -67,7 +67,9 @@ td:hover{
 .empty{
     background-color: #FFFFFF
 }
-
+.error{
+    background-color: #f7abaf
+}
 .X{
   background-color: red;
 }

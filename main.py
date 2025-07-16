@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request,redirect
+# you shouldn't store api keys in plain site so I have created a secret key in replit and called it here
 import os
 my_secret = os.environ['APININJA']
-import requests
+
+
+import requests #used to get the suduko puzzle from the api
+
 
 web_site = Flask(__name__)
 
@@ -18,6 +22,8 @@ def get_suduko():
         print("Error:", response.status_code, response.text)
     #return puzzle
     return render_template("suduko.html",puzzle=puzzle)
+
+
 
 @web_site.route('/tictactoe')
 def tictactoe():

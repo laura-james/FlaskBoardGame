@@ -1,3 +1,20 @@
+function checkSquare(row,col){
+    input = document.getElementById("boxR"+row+"C"+col);
+    console.log(input.innerText);
+    if (input.innerText=="a"){
+        input.classList.add("error");
+
+    }
+}
+
+
+
+
+
+
+
+
+//tic tac toe stuff here....
 var playerTurn = "X";
 var moves = ["","","","","","","","",""];
 var gameFinished = false;
