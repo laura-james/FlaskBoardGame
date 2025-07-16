@@ -55,19 +55,19 @@ td:hover{
 }
 
 .box{
-  border: 2px solid white;
-  background-color: black;
-  width: 70px;
-  height: 70px;
+  border: 2px solid black;
+  background-color: #dad7d7;
+  width: 30px;
+  height: 30px;
   float: left;
   text-align: center;
-  line-height: 70px;
-  font-size: 40pt;
-  font-family: cursive, "Comic Sans MS";
+  line-height: 30px;
+  font-size: 18pt;
 }
-#box4,#box7{
-  clear: both;
+.empty{
+    background-color: #FFFFFF
 }
+
 .X{
   background-color: red;
 }

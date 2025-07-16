@@ -1,0 +1,15 @@
+{% extends 'base.html' %} 
+{% block content %}
+<h2>Suduko</h2>
+{% for row in puzzle %}
+    {% for i in row %}
+        {% if i == None %}
+            <div id="box{{ i }}" class="box empty" ></div>
+        {% else %}
+            <div id="box{{ i }}" class="box" >{{ i }}</div>
+        {% endif %}
+    {% endfor %}
+    <br style="clear:both">
+{% endfor %}
+<p id="msg">
+{% endblock %}
