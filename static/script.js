@@ -1,14 +1,19 @@
 function checkSquare(row,col){
     input = document.getElementById("boxR"+row+"C"+col);
-    console.log(input.innerText);
+    console.log(input.innerHTML);
     input.innerText = input.innerText.slice(0, 1);//only allows user to enter one character
+    
+    if (input.innerHTML==="<br>") { //remove error if blank
+        input.classList.remove("error");
     //use regex to check if its a number between 1 and 9 inclusive
-    if (!/^[1-9]$/.test(input.innerText)) {
+    } else if (!/^[1-9]$/.test(input.innerText)) {
         input.classList.add("error");
+  
     }else if (checkRow(row, col, input.innerText)){
         input.classList.add("error");
     }else if (checkCol(row, col, input.innerText)){
             input.classList.add("error");
+    
     } else {
         input.classList.remove("error");
     }
