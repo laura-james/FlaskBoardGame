@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request,redirect
+import sqlite3 # to connect to the database
 # you shouldn't store api keys in plain site so I have created a secret key in replit and called it here
 import os
 my_secret = os.environ['APININJA']
@@ -21,7 +22,20 @@ def get_suduko():
     else:
         print("Error:", response.status_code, response.text)
     #return puzzle
-    return render_template("suduko.html",puzzle=puzzle)
+    # attempt to get something from the db
+
+    con = sqlite3.connect('sudoku.db')
+    cursor = con.cursor()
+    sql = '''
+            SELECT * FROM users 
+            '''
+    cursor.execute(sql)
+    con.commit()
+    rows = cursor.fetchall() 
+    for row in rows:
+        print(row)
+
+    return render_template("suduko.html",puzzle=puzzle,users = rows) #added users = rows to end to pass in tehrows from users table
 
 
 
