@@ -37,7 +37,40 @@ function checkCol(currentrow,col,value){
     }
     return false;
 }
+//TODO check the 3x3 square for duplicate too
 
+//HINTS
+function showHintMenu(e, i , j){
+    e.preventDefault();
+      console.log(i,j);
+      // Position and show custom menu
+      contextMenu.style.display = 'block';
+      contextMenu.style.left = e.pageX + 'px';
+      contextMenu.style.top = e.pageY + 'px';
+      contextMenu.innerHTML = "<a href=\"javascript:acceptHint("+i+","+j+")\">Use hint for this square</a>"
+}
+//const myDivs = document.querySelectorAll('.empty');
+//const contextMenu = document.getElementById('contextMenu');
+// Loop through and add event listener to each
+//for (let i = 0; i < myDivs.length; i++) {
+/*    myDivs[i].addEventListener('contextmenu', function(e) {
+    
+      e.preventDefault();
+      
+      // Position and show custom menu
+      contextMenu.style.display = 'block';
+      contextMenu.style.left = e.pageX + 'px';
+      contextMenu.style.top = e.pageY + 'px';
+  });
+}*/
+
+// Hide menu when clicking elsewhere
+document.addEventListener('click', function() {
+    contextMenu.style.display = 'none';
+});
+function acceptHint(i,j){
+  alert("You've accepted hint for cell"+i+","+j );
+}
 
 
 

@@ -64,7 +64,7 @@ td:hover{
   line-height: 30px;
   font-size: 18pt;
 }
-.empty{
+.empty, .empty2{
     background-color: #FFFFFF
 }
 .error{

@@ -5,7 +5,9 @@
 {%for i in range(0,9) %}
     {% for j in range(0,9) %}
         {% if puzzle[i][j] == None %}
-            <div id="boxR{{i}}C{{j}}" class="box empty" contentEditable="true" onkeyup="checkSquare({{i}},{{j}})"></div>
+            <div id="boxR{{i}}C{{j}}" class="box empty" contentEditable="true" 
+            onkeyup="checkSquare({{i}},{{j}})"
+            oncontextmenu="showHintMenu(event,{{i}},{{j}}); return false;"></div>
         {% else %}
             <div id="boxR{{i}}C{{j}}" class="box" >{{ puzzle[i][j] }}</div>
         {% endif %}
@@ -13,4 +15,21 @@
     <br style="clear:both">
 {% endfor %}
 <p id="msg">
+
+<h3>Solution</h3>
+{%for i in range(0,9) %}
+    {% for j in range(0,9) %}
+        {% if puzzle[i][j] == None %}
+            <div id="boxR{{i}}C{{j}}" class="box empty2">{{ solution[i][j] }}</div>
+        {% else %}
+            <div id="boxR{{i}}C{{j}}" class="box" >{{ solution[i][j] }}</div>
+        {% endif %}
+    {% endfor %}
+    <br style="clear:both">
+{% endfor %}
+<p id="msg">
+<div id="contextMenu" style="display: none; position: absolute; background: white; border: 1px solid #ccc; padding: 10px;">
+    xxx , should be overwritten...
+</div>
+
 {% endblock %}
