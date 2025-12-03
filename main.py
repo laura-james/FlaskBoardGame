@@ -11,7 +11,7 @@ import os
 import urllib3
 # Disable the SSL warning
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
+import json 
 web_site = Flask(__name__)
 
 
@@ -48,27 +48,31 @@ def get_suduko():
 #add puzzle
 @web_site.route('/puzzleadd',methods = ['GET', 'POST'])
 def puzzleadd():
-  #  api_url = 'https://api.api-ninjas.com/v1/sudokugenerate?difficulty=medium'
-  # response = requests.get(api_url, headers={'X-Api-Key':my_secret })
-  #  if response.status_code == requests.codes.ok:
-  #      data = response.json()         # Parse JSON
-   #     puzzle = data['puzzle']        # Get just the "puzzle" key
-  #      solution = data['solution']        # Get the solution not using yet      
-   # else:
-  #      print("Error:", response.status_code, response.text)
+    api_url = 'https://api.api-ninjas.com/v1/sudokugenerate?difficulty=medium'
+    response = requests.get(api_url, headers={'X-Api-Key':my_secret }, verify=False)
+    if response.status_code == requests.codes.ok:
+        data = response.json()         # Parse JSON
+        puzzle = data['puzzle']        # Get just the "puzzle" key
+        solution = data['solution']        # Get the solution not using yet      
+    else:
+        print("Error:", response.status_code, response.text)
     
     # attempt to connect to the db
     con = sqlite3.connect('sudoku.db')
     sql = "INSERT INTO puzzles(puzzle_json,solution_json,difficulty, isFinished) VALUES(?,?,?,?)"
     cursor = con.cursor()
-    puzzle_json = "test puzzle json"
-    solution_json = "test solution json"
-    difficulty = "easy"
+    # Convert to JSON strings
+    puzzle_json = json.dumps(puzzle)
+    solution_json = json.dumps(solution)
+    # Reading JSON back from the database: Use json.loads() to convert the string back to a Python list/dict:
+
+ 
+    difficulty = "medium"
     cursor.execute(sql,(puzzle_json, solution_json, difficulty, 0))
     con.commit()
     con.close()   # Close the connection
-    print(" added to the puzzle table")
-    return "puzzle added"
+    print("puzzle added to the puzzle table")
+    return  "puzzle added"
 
 @web_site.route('/tictactoe')
 def tictactoe():
