@@ -1,18 +1,18 @@
 {% extends 'base.html' %} 
 {% block content %}
   <h2>Tic Tac Toe</h2>
-{% for i in range(1,10) %}
+<!-- {% for i in range(1,10) %}
 <div id="box{{ i }}" class="box" onclick="clickSquare({{ i }})"></div>
-{% endfor %}
+{% endfor %} -->
 <p id="msg">
 Welcome to Tic Tac Toe
 </p>
 <div id="box1" class="box" onclick="clickSquare(1)"></div>
 <div id="box2" class="box" onclick="clickSquare(2)"></div>
-<div id="box3" class="box" onclick="clickSquare(3)"></div>
+<div id="box3" class="box" onclick="clickSquare(3)"></div><br style="clear:both">
 <div id="box4" class="box" onclick="clickSquare(4)"></div>
 <div id="box5" class="box" onclick="clickSquare(5)"></div>
-<div id="box6" class="box" onclick="clickSquare(6)"></div>
+<div id="box6" class="box" onclick="clickSquare(6)"></div><br style="clear:both">
 <div id="box7" class="box" onclick="clickSquare(7)"></div>
 <div id="box8" class="box" onclick="clickSquare(8)"></div>
 <div id="box9" class="box" onclick="clickSquare(9)"></div>
