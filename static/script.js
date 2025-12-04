@@ -12,8 +12,9 @@ function checkSquare(row,col){
     }else if (checkRow(row, col, input.innerText)){
         input.classList.add("error");
     }else if (checkCol(row, col, input.innerText)){
-            input.classList.add("error");
-    
+        input.classList.add("error");
+    }else if (checkBox(row, col, input.innerText)){
+        input.classList.add("error");
     } else {
         input.classList.remove("error");
     }
@@ -38,38 +39,46 @@ function checkCol(currentrow,col,value){
     return false;
 }
 //TODO check the 3x3 square for duplicate too
+function checkBox(currentrow,currentcol,value){    
+    // Find top-left corner of the 3x3 box
+    const boxStartRow = Math.floor(currentrow / 3) * 3;
+    const boxStartCol = Math.floor(currentcol / 3) * 3;
+    for (let row = boxStartRow; row < boxStartRow + 3; row++) {
+        for (let col = boxStartCol; col < boxStartCol + 3; col++) {
+            if (document.getElementById("boxR"+row+"C"+col).innerText == value && currentcol!=col && currentrow!=row) {
+            //duplicate found in box
+            return true;
+            }
+        }
+    }
+    return false;
+}
+
+
 
 //HINTS
-function showHintMenu(e, i , j){
+function showHintMenu(e, i , j, puzzle_id){
     e.preventDefault();
       console.log(i,j);
       // Position and show custom menu
       contextMenu.style.display = 'block';
       contextMenu.style.left = e.pageX + 'px';
       contextMenu.style.top = e.pageY + 'px';
-      contextMenu.innerHTML = "<a href=\"javascript:acceptHint("+i+","+j+")\">Use hint for this square</a>"
+      contextMenu.innerHTML = "<a href=\"javascript:acceptHint(" + i + "," + j + ","+puzzle_id+")\">Use hint for this cell</a>"
 }
-//const myDivs = document.querySelectorAll('.empty');
-//const contextMenu = document.getElementById('contextMenu');
-// Loop through and add event listener to each
-//for (let i = 0; i < myDivs.length; i++) {
-/*    myDivs[i].addEventListener('contextmenu', function(e) {
-    
-      e.preventDefault();
-      
-      // Position and show custom menu
-      contextMenu.style.display = 'block';
-      contextMenu.style.left = e.pageX + 'px';
-      contextMenu.style.top = e.pageY + 'px';
-  });
-}*/
 
 // Hide menu when clicking elsewhere
 document.addEventListener('click', function() {
     contextMenu.style.display = 'none';
 });
-function acceptHint(i,j){
-  alert("You've accepted hint for cell"+i+","+j );
+
+async function acceptHint(i, j, puzzle_id){
+    let user_id = 1; //TODO get this from the logged in user
+  
+    const response = await fetch('/get_hint/'+ user_id+'/'+puzzle_id);
+    const result = await response.text();  
+    console.log(result);  // Prints the message that is returned from the get hint page
+    alert("You've accepted hint for cell " + i + "," + j + " for puzzle id " + puzzle_id );
 }
 
 

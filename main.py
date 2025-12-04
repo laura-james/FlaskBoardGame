@@ -5,50 +5,25 @@ import os
 my_secret = os.environ['APININJA']
 
 
-import requests #used to get the suduko puzzle from the api
-import certifi
-import os
-import urllib3
+import requests # used to get the suduko puzzle from the api
+import os # used to store the api key in the operating system and not in plain site on github!
+import urllib3 # used to disable pesky ssl warnings
 # Disable the SSL warning
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import json 
+
 web_site = Flask(__name__)
 
-
 @web_site.route('/')
-def get_suduko():
-    api_url = 'https://api.api-ninjas.com/v1/sudokugenerate?difficulty=medium'
-    response = requests.get(api_url, headers={'X-Api-Key':my_secret }, verify=False)
-    if response.status_code == requests.codes.ok:
-        data = response.json()         # Parse JSON
-        puzzle = data['puzzle']        # Get just the "puzzle" key
-        solution = data['solution']        # Get the solution not using yet
-                
-    else:
-        print("Error:", response.status_code, response.text)
-    
-    # attempt to get something from the db
+def home():
+    return render_template("home.html")
 
-    con = sqlite3.connect('sudoku.db')
-    cursor = con.cursor()
-    sql = '''
-            SELECT * FROM users 
-            '''
-    cursor.execute(sql)
-    con.commit()
-    
-    rows = cursor.fetchall() 
-    for row in rows:
-        print(row)
-    con.close()   # Close the connection
-    return render_template("suduko.html",puzzle = puzzle, users = rows, solution=solution) #added users = rows to end to pass in the rows from users table
-
-#@web_site.route('/hint')
 
 #add puzzle
-@web_site.route('/puzzleadd',methods = ['GET', 'POST'])
-def puzzleadd():
-    api_url = 'https://api.api-ninjas.com/v1/sudokugenerate?difficulty=medium'
+#@web_site.route('/puzzleadd',methods = ['GET', 'POST'])
+@web_site.route('/startpuzzle/<difficulty>') 
+def puzzleadd(difficulty):
+    api_url = 'https://api.api-ninjas.com/v1/sudokugenerate?difficulty=' + difficulty
     response = requests.get(api_url, headers={'X-Api-Key':my_secret }, verify=False)
     if response.status_code == requests.codes.ok:
         data = response.json()         # Parse JSON
@@ -59,20 +34,60 @@ def puzzleadd():
     
     # attempt to connect to the db
     con = sqlite3.connect('sudoku.db')
-    sql = "INSERT INTO puzzles(puzzle_json,solution_json,difficulty, isFinished) VALUES(?,?,?,?)"
+    sql = "INSERT INTO puzzles(puzzle_json,solution_json,difficulty, isFinished,user_id) VALUES(?,?,?,?,?)"
     cursor = con.cursor()
     # Convert to JSON strings
-    puzzle_json = json.dumps(puzzle)
-    solution_json = json.dumps(solution)
-    # Reading JSON back from the database: Use json.loads() to convert the string back to a Python list/dict:
+    puzzle_json_string = json.dumps(puzzle)
+    solution_json_string = json.dumps(solution)
+   
+    user_id = 1
+    cursor.execute(sql,(puzzle_json_string, solution_json_string, difficulty, 0,user_id))
+    con.commit()
+    # Get the ID of the last inserted record
+    last_id = cursor.lastrowid
+    print(f"Inserted puzzle with ID: {last_id}")
+    con.close()   # Close the connection
+    # redirect to web page /do_puzzle/puzzle_id
+    return redirect(f'/do_puzzle/{last_id}')
 
- 
-    difficulty = "medium"
-    cursor.execute(sql,(puzzle_json, solution_json, difficulty, 0))
+
+@web_site.route('/do_puzzle/<puzzle_id>')
+def get_puzzle(puzzle_id):
+    # Get the puzzle stored in the db using its puzzle id
+    con = sqlite3.connect('sudoku.db')
+    con.row_factory = sqlite3.Row #should get row as an associative array - so you can use table field names rather than numbers
+    cursor = con.cursor()
+    sql = '''
+            SELECT * FROM puzzles WHERE puzzle_id = ?
+            '''
+    cursor.execute(sql, (puzzle_id,)) #the trailing comma IS important! It tells  Python  that the brackets are defining a tuple
+    con.commit()
+    
+    rows = cursor.fetchall() 
+    for row in rows:
+        print(row)
+         # FYI Reading JSON back from the database: Use json.loads() to convert the string back to a Python list/dict:
+        puzzle = json.loads(row["puzzle_json"])
+        solution = json.loads(row["solution_json"])
+    con.close()   # Close the connection
+    return render_template("suduko.html",puzzle_id = puzzle_id, puzzle = puzzle, solution = solution) 
+
+
+#====================== GET HINT ==============================
+@web_site.route('/get_hint/<puzzle_id>/<user_id>')
+def get_hint(puzzle_id, user_id): # notice how this is taking in two parameters
+    # TODO how do we stop them adding multiple hints for the same cell???
+    # attempt to connect to the db
+    con = sqlite3.connect('sudoku.db')
+    sql = "INSERT INTO hints(puzzle_id,user_id) VALUES(?,?)"
+    cursor = con.cursor()
+    cursor.execute(sql,(puzzle_id,user_id))
     con.commit()
     con.close()   # Close the connection
-    print("puzzle added to the puzzle table")
-    return  "puzzle added"
+    print(f"hint added to the hints table {puzzle_id} {user_id}")
+
+    return "hint gotten"
+
 
 @web_site.route('/tictactoe')
 def tictactoe():
@@ -80,7 +95,35 @@ def tictactoe():
 
 
 
+#OLD STUFF
+
+# def get_suduko(difficulty):
+#     api_url = 'https://api.api-ninjas.com/v1/sudokugenerate?difficulty='+difficulty
+#     response = requests.get(api_url, headers={'X-Api-Key':my_secret }, verify=False)
+#     if response.status_code == requests.codes.ok:
+#         data = response.json()         # Parse JSON
+#         puzzle = data['puzzle']        # Get just the "puzzle" key
+#         solution = data['solution']    # Get the solution not using yet
+#     else:
+#         print("Error:", response.status_code, response.text)
+    
+    # attempt to get something from the db
+
+    # con = sqlite3.connect('sudoku.db')
+    # cursor = con.cursor()
+    # sql = '''
+    #         SELECT * FROM users 
+    #         '''
+    # cursor.execute(sql)
+    # con.commit()
+    
+    # rows = cursor.fetchall() 
+    # for row in rows:
+    #     print(row)
+    # con.close()   # Close the connection
+  #  return render_template("suduko.html",puzzle = puzzle, solution = solution) 
 
 
 
-web_site.run(host='0.0.0.0', port=8080)
+
+web_site.run(host='0.0.0.0', port=8080, debug=True) #added debug=True - much more helpful error messages!!!

@@ -7,8 +7,18 @@
   </head>
   <body>
     <div id="main">
-    <ul>
-      <li><a href="/">Sudoku</a></li>
+    <ul class="menu">
+      <li><a href="/">HOME</a></li>
+      <li class="has-submenu">
+        <a href="#">New Puzzle</a>
+      <ul class="submenu">
+        <li><a href="/startpuzzle/easy">Easy</a></li>
+        <li><a href="/startpuzzle/medium">Medium</a></li>
+        <li><a href="/startpuzzle/hard">Hard</a></li>
+      </ul>
+      </li>
+      <li><a href="/mypuzzles">My Puzzles</a></li>
+      <li><a href="/leaderboard">Leaderboard</a></li>
       <li><a href="/tictactoe">Tic Tac Toe</a></li>
     </ul>
    
@@ -16,6 +26,6 @@
     {% block content %}{% endblock %}
 
     </div>
-      <script src="static/script.js"></script>
+    <script src="/static/script.js"></script>
   </body>
 </html>

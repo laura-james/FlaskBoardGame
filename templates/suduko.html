@@ -2,12 +2,14 @@
 {% block content %}
 {{users}}
 <h2>Suduko</h2>
+<h3>Puzzle ID: {{puzzle_id}}</h3>
+<p>Right click to use a hint for a cell!</p>
 {%for i in range(0,9) %}
     {% for j in range(0,9) %}
         {% if puzzle[i][j] == None %}
             <div id="boxR{{i}}C{{j}}" class="box empty" contentEditable="true" 
             onkeyup="checkSquare({{i}},{{j}})"
-            oncontextmenu="showHintMenu(event,{{i}},{{j}}); return false;"></div>
+            oncontextmenu="showHintMenu(event, {{i}}, {{j}}, {{puzzle_id}}); return false;"></div>
         {% else %}
             <div id="boxR{{i}}C{{j}}" class="box" >{{ puzzle[i][j] }}</div>
         {% endif %}

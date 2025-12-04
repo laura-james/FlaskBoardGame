@@ -1,38 +1,16 @@
 body{
-  background-color:rgb(149, 213, 180);
+  background-color: #ff6600;
   font-family:Verdana;
-  margin:0px;
+  text-align: center;
+ margin: 0 20%;
   padding:0px
 }
+
 #main{
   margin:0px auto;
   width:75%;
 }
-ul{  
-  display: flex;  
-  justify-content: space-around;
-  padding:0px;
-  margin:0px;
-}
-ul li {  
-  flex: 1;  
-  list-style:none;
-}
-ul li a {  
-  padding:5px;
-  margin:2%;
-  background-color:white;
-  display:inline-block;
-  height:100%;
-   width:100%;
-   border:4px solid #f32040;
-  text-decoration:none;
-  font-weight:bold;
-}
-ul li a:hover {  
-  background-color:#c1b9ae;
-  text-decoration: underline;
-}
+
 input{
   padding:5px;
   margin:5px;
@@ -41,18 +19,7 @@ label{
   width: 162px;
   display: inline-flex;
 }
-table{
-  background-color:azure;
-  border-collapse: collapse;
-  width:100%;
-  border:2px solid #ff6600;
-}
-td{
-  padding:5px;
-}
-td:hover{
-  background-color: rgb(212, 247, 184);
-}
+
 
 .box{
   border: 2px solid black;
@@ -63,6 +30,18 @@ td:hover{
   text-align: center;
   line-height: 30px;
   font-size: 18pt;
+}
+#boxR2C0,#boxR2C1,#boxR2C2,#boxR2C3,#boxR2C4,#boxR2C5,
+#boxR2C6,#boxR2C7,#boxR2C8,#boxR5C0,#boxR5C1,#boxR5C2,
+#boxR5C3,#boxR5C4,#boxR5C5,#boxR5C6,#boxR5C7,#boxR5C8
+{
+border-bottom: 4px solid black;
+}
+#boxR0C2,#boxR1C2,#boxR2C2,#boxR3C2,#boxR4C2,#boxR5C2,
+#boxR6C2,#boxR7C2,#boxR8C2,#boxR0C5,#boxR1C5,#boxR2C5,
+#boxR3C5,#boxR4C5,#boxR5C5,#boxR6C5,#boxR7C5,#boxR8C5
+{
+border-right: 4px solid black;
 }
 .empty, .empty2{
     background-color: #FFFFFF
@@ -76,12 +55,65 @@ td:hover{
 .O{
   background-color: green;
 }
-body{
-  background-color: #ff6600;
-  text-align: center;
-  margin: 0 20%;
-}
+
 #msg{
   font-family: cursive,"Comic Sans MS";
   font-size: 30pt;
+}
+
+
+/* MENU STYLESReset and base styles */
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background-color: #333;
+  display: flex;
+}
+
+.menu li {
+  position: relative;
+}
+
+.menu a {
+  display: block;
+  padding: 15px 20px;
+  color: white;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.menu a:hover {
+  background-color: #555;
+}
+
+/* Submenu styles */
+.submenu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #444;
+  min-width: 150px;
+  display: none; /* Hidden by default */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.submenu li {
+  width: 100%;
+}
+
+.submenu a {
+  padding: 12px 20px;
+}
+
+.submenu a:hover {
+  background-color: #666;
+}
+
+/* Show submenu on hover */
+.has-submenu:hover .submenu {
+  display: block;
 }
