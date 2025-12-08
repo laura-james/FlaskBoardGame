@@ -81,6 +81,17 @@ async function acceptHint(i, j, puzzle_id){
     alert("You've accepted hint for cell " + i + "," + j + " for puzzle id " + puzzle_id );
 }
 
+function save_puzzle(){
+  alert("TODO - save puzzle to db");
+  // this should be done in python
+}
+
+function clear_puzzle(){
+  alert("TODO - clear cells");
+  // thsi could be done in jscript
+  // should it also save this to db??
+}
+
 
 
 
