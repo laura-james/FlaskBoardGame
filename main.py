@@ -50,9 +50,9 @@ def puzzleadd(difficulty):
     # redirect to web page /do_puzzle/puzzle_id
     return redirect(f'/do_puzzle/{last_id}')
 
-
 @web_site.route('/do_puzzle/<puzzle_id>')
 def get_puzzle(puzzle_id):
+    user_id = 1
     # Get the puzzle stored in the db using its puzzle id
     con = sqlite3.connect('sudoku.db')
     con.row_factory = sqlite3.Row #should get row as an associative array - so you can use table field names rather than numbers
@@ -70,11 +70,12 @@ def get_puzzle(puzzle_id):
         puzzle = json.loads(row["puzzle_json"])
         solution = json.loads(row["solution_json"])
     con.close()   # Close the connection
-    return render_template("suduko.html",puzzle_id = puzzle_id, puzzle = puzzle, solution = solution) 
+    num_hints = get_num_hints(puzzle_id, user_id)
+    return render_template("suduko.html",puzzle_id = puzzle_id, puzzle = puzzle, solution = solution, num_hints = num_hints) 
 
 
 #====================== GET HINT ==============================
-@web_site.route('/get_hint/<puzzle_id>/<user_id>')
+@web_site.route('/get_hint/<user_id>/<puzzle_id>') #NEW!! swapped the parameters around!
 def get_hint(puzzle_id, user_id): # notice how this is taking in two parameters
     # TODO how do we stop them adding multiple hints for the same cell???
     # attempt to connect to the db
@@ -85,10 +86,42 @@ def get_hint(puzzle_id, user_id): # notice how this is taking in two parameters
     con.commit()
     con.close()   # Close the connection
     print(f"hint added to the hints table {puzzle_id} {user_id}")
-
     return "hint gotten"
+#======= SAVE PUZZLE ==========
 
+@web_site.route('/save_puzzle/<int:puzzle_id>', methods=['POST'])
+def save_puzzle(puzzle_id):
+# Get the data sent from the browser
+    data = request.get_json()
+    puzzle_list = data['puzzle'] # Access the list directly
 
+    # Convert the list to a string for the database
+    json_string = json.dumps(puzzle_list)
+
+    # Save to database
+    con = sqlite3.connect('sudoku.db')
+    cursor = con.cursor()
+    sql = "UPDATE puzzles SET puzzle_json = ? WHERE puzzle_id = ?"
+    cursor.execute(sql, (json_string, puzzle_id))
+    con.commit()
+    con.close()
+
+    return "OK" # ust return a simple string
+#======== GET NUM HINTS ========
+def get_num_hints(puzzle_id, user_id):
+    # Get the number of hints stored in the db using its puzzle id & user id
+    con = sqlite3.connect('sudoku.db')
+    cursor = con.cursor()
+    sql = '''
+            SELECT COUNT(hint_id) FROM hints WHERE puzzle_id = ? and user_id = ?
+            '''
+    cursor.execute(sql, (puzzle_id, user_id)) 
+    con.commit()
+    
+    rows = cursor.fetchall() 
+    for row in rows:
+        print(row[0])
+        return row[0]
 @web_site.route('/tictactoe')
 def tictactoe():
   return render_template("tictactoe.html")

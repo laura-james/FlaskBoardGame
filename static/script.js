@@ -74,24 +74,72 @@ document.addEventListener('click', function() {
 
 async function acceptHint(i, j, puzzle_id){
     let user_id = 1; //TODO get this from the logged in user
-  
     const response = await fetch('/get_hint/'+ user_id+'/'+puzzle_id);
     const result = await response.text();  
     console.log(result);  // Prints the message that is returned from the get hint page
     alert("You've accepted hint for cell " + i + "," + j + " for puzzle id " + puzzle_id );
+    // TODO show the correct answer in the cell!
+    // NEW!!
+    let answer = document.querySelector(".solution_grid #boxR"+i+"C"+j).innerHTML;
+    console.log(answer);
+    document.querySelector(".puzzle_grid #boxR"+i+"C"+j).innerHTML = answer;
 }
 
-function save_puzzle(){
-  alert("TODO - save puzzle to db");
-  // this should be done in python
+async function save_puzzle(puzzle_id){
+    alert("TODO - save puzzle to db");
+    //NEW!!
+    // this runs the save_puzzle route in python
+    const puzzleData = getPuzzleData(); 
+
+    // Send the data to the Python route 'save_puzzle' - it uses POST at its sending data
+    const response = await fetch('/save_puzzle/' + puzzle_id, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ puzzle: puzzleData })
+    });
+
+    // Check if Python sent back "OK"
+    const status = await response.text();
+    if (status === "OK") {
+        alert("Game Saved!");
+    }   
 }
 
-function clear_puzzle(){
+function clear_puzzle(puzzle_id){
   alert("TODO - clear cells");
-  // thsi could be done in jscript
+  //NEW!!
+  // get all the cells that are in the puzzle grid
+  let cells = document.querySelectorAll(".puzzle_grid .empty");
+  //loop through each of these setting the innerHTML to blank
+  for(let i = 0; i < cells.length; i++){
+    cells[i].innerHTML = "";
+    cells[i].classList.remove("error");//gets rid of the red error bg
+  }
   // should it also save this to db??
+  save_puzzle(puzzle_id);
 }
+function getPuzzleData() {
+    /* helper function to get the puzzle data from teh screen and turn it into json */
+    let puzzleArray = [];
 
+    for (let i = 0; i < 9; i++) {
+        let row = [];
+        for (let j = 0; j < 9; j++) {
+            // Target the specific box using  ID 
+            let cell = document.querySelector(".puzzle_grid #boxR" + i + "C" + j);
+            let value = cell.innerText.trim();// get rid of unneeded spaces
+
+            // Convert to integer if it's a number, otherwise null
+            if (value === "" || isNaN(value)) {
+                row.push(null);
+            } else {
+                row.push(parseInt(value));
+            }
+        }
+        puzzleArray.push(row);
+    }
+    return puzzleArray;
+}
 
 
 

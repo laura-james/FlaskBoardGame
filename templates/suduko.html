@@ -4,7 +4,8 @@
 <h2>Suduko</h2>
 <h3>Puzzle ID: {{puzzle_id}}</h3>
 <p>Right click to use a hint for a cell!</p>
-<p>Hints used so far: 0</p>
+<p>Hints used so far: <span id="num_hints">{{num_hints}}</span></p>
+<div class="puzzle_grid"><!--NEW!!!!-->
 {%for i in range(0,9) %}
     {% for j in range(0,9) %}
         {% if puzzle[i][j] == None %}
@@ -17,11 +18,13 @@
     {% endfor %}
     <br style="clear:both">
 {% endfor %}
-<button onclick="save_puzzle()">Save my progress</button>
-<button onclick="clear_puzzle()">Clear puzzle & start over</button>
+</div><!--NEW!!!!-->
+<button onclick="save_puzzle({{puzzle_id}})">Save my progress</button>
+<button onclick="clear_puzzle({{puzzle_id}})">Clear puzzle & start over</button>
 <p id="msg">
 
 <h3>Solution</h3>
+<div class="solution_grid"><!--NEW!!!!-->
 {%for i in range(0,9) %}
     {% for j in range(0,9) %}
         {% if puzzle[i][j] == None %}
@@ -32,6 +35,7 @@
     {% endfor %}
     <br style="clear:both">
 {% endfor %}
+</div><!--NEW!!!-->
 <p id="msg">
 <div id="contextMenu" style="display: none; position: absolute; background: white; border: 1px solid #ccc; padding: 10px;">
     xxx , should be overwritten...
