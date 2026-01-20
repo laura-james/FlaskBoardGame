@@ -18,6 +18,7 @@ function checkSquare(row,col){
     } else {
         input.classList.remove("error");
     }
+    //TODO check if pux=zzle is the same as solution if so then say congrats and set isFinished to 1
 }
 function checkRow(row,currentcol,value){
     for (let col = 0; col < 9; col++) {
@@ -83,10 +84,12 @@ async function acceptHint(i, j, puzzle_id){
     let answer = document.querySelector(".solution_grid #boxR"+i+"C"+j).innerHTML;
     console.log(answer);
     document.querySelector(".puzzle_grid #boxR"+i+"C"+j).innerHTML = answer;
+    //NEW !!!! Use result above to write the new hint number to the place on the doc
+    document.getElementById("num_hints").innerHTML=result;
 }
 
 async function save_puzzle(puzzle_id){
-    alert("TODO - save puzzle to db");
+    //alert("TODO - save puzzle to db");
     //NEW!!
     // this runs the save_puzzle route in python
     const puzzleData = getPuzzleData(); 
@@ -119,7 +122,7 @@ function clear_puzzle(puzzle_id){
   save_puzzle(puzzle_id);
 }
 function getPuzzleData() {
-    /* helper function to get the puzzle data from teh screen and turn it into json */
+    /* helper function to get the puzzle data from teh screen and turn it into 2darray */
     let puzzleArray = [];
 
     for (let i = 0; i < 9; i++) {

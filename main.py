@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request,redirect
 import sqlite3 # to connect to the database
-# you shouldn't store api keys in plain site so I have created a secret key in replit and called it here
+# you shouldn't store api keys in plain site so I have created a secret key and called it here
 import os
 my_secret = os.environ['APININJA']
 
 
-import requests # used to get the suduko puzzle from the api
+import requests # used to get the sudoku puzzle from the api
 import os # used to store the api key in the operating system and not in plain site on github!
 import urllib3 # used to disable pesky ssl warnings
 # Disable the SSL warning
@@ -52,25 +52,24 @@ def puzzleadd(difficulty):
 
 @web_site.route('/do_puzzle/<puzzle_id>')
 def get_puzzle(puzzle_id):
-    user_id = 1
+    user_id = 1 # chnage this when users can login!
     # Get the puzzle stored in the db using its puzzle id
     con = sqlite3.connect('sudoku.db')
-    con.row_factory = sqlite3.Row #should get row as an associative array - so you can use table field names rather than numbers
+    con.row_factory = sqlite3.Row #should get row as an associative array - so you can use table field names rather than array indexes
     cursor = con.cursor()
     sql = '''
             SELECT * FROM puzzles WHERE puzzle_id = ?
             '''
-    cursor.execute(sql, (puzzle_id,)) #the trailing comma IS important! It tells  Python  that the brackets are defining a tuple
+    cursor.execute(sql, (puzzle_id,)) #the trailing comma IS important! It tells  Python  that the brackets are defining a tuple even though its only one item
     con.commit()
     
     rows = cursor.fetchall() 
     for row in rows:
-        print(row)
          # FYI Reading JSON back from the database: Use json.loads() to convert the string back to a Python list/dict:
         puzzle = json.loads(row["puzzle_json"])
         solution = json.loads(row["solution_json"])
     con.close()   # Close the connection
-    num_hints = get_num_hints(puzzle_id, user_id)
+    num_hints = get_num_hints(puzzle_id, user_id) # gets number of hints used for this puzzle
     return render_template("suduko.html",puzzle_id = puzzle_id, puzzle = puzzle, solution = solution, num_hints = num_hints) 
 
 
@@ -85,10 +84,13 @@ def get_hint(puzzle_id, user_id): # notice how this is taking in two parameters
     cursor.execute(sql,(puzzle_id,user_id))
     con.commit()
     con.close()   # Close the connection
+    # NEW - go and get how many hints there are now and return THAT at the end of this function instead of 'hint gotten'!
+    num_hints = get_num_hints(puzzle_id, user_id) # gets number of hints used for this puzzle
     print(f"hint added to the hints table {puzzle_id} {user_id}")
-    return "hint gotten"
-#======= SAVE PUZZLE ==========
+    # return "hint gotten"
+    return str(num_hints)
 
+#======= SAVE PUZZLE ==========
 @web_site.route('/save_puzzle/<int:puzzle_id>', methods=['POST'])
 def save_puzzle(puzzle_id):
 # Get the data sent from the browser
@@ -106,7 +108,8 @@ def save_puzzle(puzzle_id):
     con.commit()
     con.close()
 
-    return "OK" # ust return a simple string
+    return "OK" # just return a simple string
+
 #======== GET NUM HINTS ========
 def get_num_hints(puzzle_id, user_id):
     # Get the number of hints stored in the db using its puzzle id & user id
@@ -120,8 +123,11 @@ def get_num_hints(puzzle_id, user_id):
     
     rows = cursor.fetchall() 
     for row in rows:
-        print(row[0])
+        print("Number of hints used for this puzzle:", row[0])
         return row[0]
+
+# Could probably delete this now...
+
 @web_site.route('/tictactoe')
 def tictactoe():
   return render_template("tictactoe.html")
