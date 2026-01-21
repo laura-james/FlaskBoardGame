@@ -11,9 +11,13 @@
         {% if puzzle[i][j] == None %}
             <div id="boxR{{i}}C{{j}}" class="box empty" contentEditable="true" 
             onkeyup="checkSquare({{i}},{{j}})"
-            oncontextmenu="showHintMenu(event, {{i}}, {{j}}, {{puzzle_id}}); return false;"></div>
+            oncontextmenu="showHintMenu(event, {{i}}, {{j}}, {{puzzle_id}}); return false;">
+             {% if attempt[i][j] != None %}
+                    {{ attempt[i][j] }}
+            {% endif %}
+        </div>
         {% else %}
-            <div id="boxR{{i}}C{{j}}" class="box" >{{ puzzle[i][j] }}</div>
+            <div id="boxR{{i}}C{{j}}" class="box" >{{ attempt[i][j] }}</div>
         {% endif %}
     {% endfor %}
     <br style="clear:both">

@@ -34,14 +34,15 @@ def puzzleadd(difficulty):
     
     # attempt to connect to the db
     con = sqlite3.connect('sudoku.db')
-    sql = "INSERT INTO puzzles(puzzle_json,solution_json,difficulty, isFinished,user_id) VALUES(?,?,?,?,?)"
+    # NEW added attempt_json
+    sql = "INSERT INTO puzzles(puzzle_json,solution_json,difficulty, isFinished,user_id,attempt_json) VALUES(?,?,?,?,?,?)"
     cursor = con.cursor()
     # Convert to JSON strings
     puzzle_json_string = json.dumps(puzzle)
     solution_json_string = json.dumps(solution)
    
     user_id = 1
-    cursor.execute(sql,(puzzle_json_string, solution_json_string, difficulty, 0,user_id))
+    cursor.execute(sql,(puzzle_json_string, solution_json_string, difficulty, 0,user_id, puzzle_json_string))
     con.commit()
     # Get the ID of the last inserted record
     last_id = cursor.lastrowid
@@ -68,9 +69,10 @@ def get_puzzle(puzzle_id):
          # FYI Reading JSON back from the database: Use json.loads() to convert the string back to a Python list/dict:
         puzzle = json.loads(row["puzzle_json"])
         solution = json.loads(row["solution_json"])
+        attempt = json.loads(row["attempt_json"])
     con.close()   # Close the connection
     num_hints = get_num_hints(puzzle_id, user_id) # gets number of hints used for this puzzle
-    return render_template("suduko.html",puzzle_id = puzzle_id, puzzle = puzzle, solution = solution, num_hints = num_hints) 
+    return render_template("suduko.html",puzzle_id = puzzle_id, puzzle = puzzle, solution = solution, num_hints = num_hints, attempt = attempt) 
 
 
 #====================== GET HINT ==============================
@@ -103,7 +105,7 @@ def save_puzzle(puzzle_id):
     # Save to database
     con = sqlite3.connect('sudoku.db')
     cursor = con.cursor()
-    sql = "UPDATE puzzles SET puzzle_json = ? WHERE puzzle_id = ?"
+    sql = "UPDATE puzzles SET attempt_json = ? WHERE puzzle_id = ?"
     cursor.execute(sql, (json_string, puzzle_id))
     con.commit()
     con.close()
