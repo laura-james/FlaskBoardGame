@@ -1,4 +1,7 @@
-function checkSquare(row,col){
+// had to make it async now that the mark completed function is added
+// added puzzle_id as parameter
+async function checkSquare(row,col,puzzle_id){
+    // runs on every key up in the puzzle
     input = document.getElementById("boxR"+row+"C"+col);
     console.log(input.innerHTML);
     input.innerText = input.innerText.slice(0, 1);//only allows user to enter one character
@@ -18,7 +21,15 @@ function checkSquare(row,col){
     } else {
         input.classList.remove("error");
     }
-    //TODO check if pux=zzle is the same as solution if so then say congrats and set isFinished to 1
+    //NEW check if puzzle is the same as solution if so then say congrats and set isFinished to 1
+    if (checkFinished(puzzle_id)){
+        alert("congrats you have completed the puzzle! TODO - save puzzle and set isFinished to 1 - and what else...?")
+        // TODO save puzzle and set isFinished to 1
+        // Should the puzzle.....?
+        const response = await fetch('/puzzle_finished/'+puzzle_id);
+        const result = await response.text();  
+        console.log(result);
+    }
 }
 function checkRow(row,currentcol,value){
     for (let col = 0; col < 9; col++) {
@@ -39,8 +50,9 @@ function checkCol(currentrow,col,value){
     }
     return false;
 }
-//TODO check the 3x3 square for duplicate too
+
 function checkBox(currentrow,currentcol,value){    
+    // check the 3x3 square for duplicate
     // Find top-left corner of the 3x3 box
     const boxStartRow = Math.floor(currentrow / 3) * 3;
     const boxStartCol = Math.floor(currentcol / 3) * 3;
@@ -53,6 +65,26 @@ function checkBox(currentrow,currentcol,value){
         }
     }
     return false;
+}
+function checkFinished(puzzle_id){
+    // called from checkSquare() function which runs on each keyUp event
+    // loops through all boxes in puzzle
+    // checks against the solution
+    // returns false as soon as it finds a mismatch
+    // if no mismatch found it returns true
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            let answer = document.querySelector(".solution_grid #boxR"+row+"C"+col).innerHTML;
+            let attempt = document.querySelector(".puzzle_grid #boxR"+row+"C"+col).innerHTML;
+            if (answer != attempt) {
+                //incorrect answer found so return false
+                console.log("row: "+ row +" col: "+ col +" answer: "+ answer + " attempt: " + attempt);
+                return false;
+            }
+        }
+    }
+    console.log("all attempts correct - game complete")
+    return true;
 }
 
 
@@ -109,7 +141,7 @@ async function save_puzzle(puzzle_id){
 }
 
 function clear_puzzle(puzzle_id){
-  alert("TODO - clear cells");
+  //alert("TODO - clear cells");
   //NEW!!
   // get all the cells that are in the puzzle grid
   let cells = document.querySelectorAll(".puzzle_grid .empty");

@@ -93,20 +93,34 @@ def get_hint(puzzle_id, user_id): # notice how this is taking in two parameters
     return str(num_hints)
 
 #======= SAVE PUZZLE ==========
+
 @web_site.route('/save_puzzle/<int:puzzle_id>', methods=['POST'])
 def save_puzzle(puzzle_id):
-# Get the data sent from the browser
-    data = request.get_json()
-    puzzle_list = data['puzzle'] # Access the list directly
+    # Takes the puzzle data submitted from the browser in the POST
+    # from the javascript function save_puzzle(puzzle_id)
+    data = request.get_json();
+    puzzle_list = data['puzzle'] # Access the puzzle data directly
 
-    # Convert the list to a string for the database
+    # Convert the puzzle data to a string for the database
     json_string = json.dumps(puzzle_list)
 
-    # Save to database
+    # Update the attempt_json in the puzzle record
     con = sqlite3.connect('sudoku.db')
     cursor = con.cursor()
     sql = "UPDATE puzzles SET attempt_json = ? WHERE puzzle_id = ?"
     cursor.execute(sql, (json_string, puzzle_id))
+    con.commit()
+    con.close()
+
+    return "OK" # just return a simple string
+
+@web_site.route('/puzzle_finished/<int:puzzle_id>')
+def puzzle_finished(puzzle_id):
+    # Update the attempt_json in the puzzle record
+    con = sqlite3.connect('sudoku.db')
+    cursor = con.cursor()
+    sql = "UPDATE puzzles SET isFinished = 1 WHERE puzzle_id = ?"
+    cursor.execute(sql, (puzzle_id,))
     con.commit()
     con.close()
 
