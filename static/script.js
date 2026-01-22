@@ -117,7 +117,7 @@ async function acceptHint(i, j, puzzle_id){
     console.log(answer);
     document.querySelector(".puzzle_grid #boxR"+i+"C"+j).innerHTML = answer;
     //NEW !!!! Use result above to write the new hint number to the place on the doc
-    document.getElementById("num_hints").innerHTML=result;
+    document.getElementById("num_hints").innerHTML = result;
 }
 
 async function save_puzzle(puzzle_id){
