@@ -1,6 +1,6 @@
-# Documentation: Routes and JavaScript References in `main.py`
+# Documentation: Routes and JavaScript references in `main.py`
 
-## Routes in `main.py` and Their Functions
+## Routes in `main.py` and their functions
 
 ### 1. `/`
 - **Python Definition**:
@@ -31,6 +31,8 @@
   @web_site.route('/do_puzzle/<puzzle_id>')
   def get_puzzle(puzzle_id):
       # Retrieves a puzzle from the database; renders it for interaction.
+      num_hints = get_num_hints(puzzle_id, user_id)  # Gets number of hints used for this puzzle
+      return render_template("suduko.html", puzzle_id=puzzle_id, puzzle=puzzle, solution=solution, num_hints=num_hints, attempt=attempt)
   ```
 - **Purpose**: Fetches the puzzle from the database and allows solving or rendering as Sudoku.
 
@@ -41,35 +43,37 @@
   ```python
   @web_site.route('/save_puzzle/<int:puzzle_id>', methods=['POST'])
   def save_puzzle(puzzle_id):
-      # Updates the puzzle state in the database.
+      data = request.get_json()
+      # Updates the user-provided attempt JSON in the database.
   ```
-- **Purpose**: Saves the user's puzzle progress via a POST request.
+- **Purpose**: Saves the user's Sudoku attempt (progress) via a POST request.
 
 ---
 
-### 5. `/tictactoe`
-- **Python Definition**:
-  ```python
-  @web_site.route('/tictactoe')
-  def tictactoe():
-      return render_template("tictactoe.html")
-  ```
-- **Purpose**: Renders a Tic Tac Toe game page.
-
----
-
-### 6. `/get_hint/<user_id>/<puzzle_id>`
+### 5. `/get_hint/<user_id>/<puzzle_id>`
 - **Python Definition**:
   ```python
   @web_site.route('/get_hint/<user_id>/<puzzle_id>')
   def get_hint(puzzle_id, user_id):
-      # Adds a hint to the specified puzzle for the user.
+      # Adds a hint for the user for a specific puzzle.
   ```
-- **Purpose**: Requests and records a new hint for a Sudoku puzzle.
+- **Purpose**: Facilitates hint functionality for a Sudoku puzzle.
 
 ---
 
-## JavaScript References to Routes
+### 6. `/puzzle_finished/<int:puzzle_id>`
+- **Python Definition**:
+  ```python
+  @web_site.route('/puzzle_finished/<int:puzzle_id>')
+  def puzzle_finished(puzzle_id):
+      # Sets the isFinished flag for a completed puzzle.
+  ```
+- **Purpose**: Marks a Sudoku puzzle as completed when all entries match the solution.
+
+
+---
+
+## JavaScript references to routes
 
 ### 1. `/save_puzzle/<int:puzzle_id>`
 - **JavaScript Function**:
@@ -85,26 +89,95 @@
       if (status === "OK") alert("Game Saved!");
   }
   ```
-- **Purpose**: This function runs when saving a puzzle game's progress via the `/save_puzzle` POST route.
+- **Purpose**: Saves the game's progress
 
----
+# THERE ARE OTHERS...
 
-### 2. Template and Navigation Links
-- **HTML Snippet** (from `templates/base.html` and `templates/home.html`):
-  ```html
-  <li><a href="/startpuzzle/easy">Easy</a></li>
-  <li><a href="/mypuzzles">My Puzzles</a></li>
+# JavaScript Functions in `script.js`
+
+## 1. `checkSquare(row, col, puzzle_id)`
+- **Definition**:
+  ```javascript
+  async function checkSquare(row, col, puzzle_id) {
+      // Runs on every key up in the puzzle.
+      // Allows one valid character input and checks row, column, or 3x3 grids for conflicts.
+      if (checkFinished(puzzle_id)) {
+          alert("Congratulations! Puzzle completed.");
+          const response = await fetch('/puzzle_finished/' + puzzle_id);
+          const result = await response.text();
+          console.log(result);
+      }
+  }
   ```
-- **References**:
-  - `/startpuzzle/<difficulty>` is directly linked here for `easy`, `medium`, and `hard`.
-  - `/mypuzzles` and other routes may rely on direct navigation rather than JavaScript.
+- **Purpose**: Validates the user input in the Sudoku grid, giving visual feedback for errors and checking if the puzzle is complete.
 
 ---
 
-### 3. `/do_puzzle/<puzzle_id>`
-This route is accessed via redirects in Python after generating new puzzles. No direct JavaScript calls are evident here.
+## 2. `checkRow(row, currentCol, value)`
+- **Definition**:
+  ```javascript
+  function checkRow(row, currentCol, value) {
+      for (let col = 0; col < 9; col++) {
+          if (document.getElementById("boxR" + row + "C" + col).innerText == value && currentCol != col) {
+              return true;
+          }
+      }
+      return false;
+  }
+  ```
+- **Purpose**: Checks for duplicate entries in the same row in the Sudoku grid.
 
 ---
 
-## Summary
-This document outlines the functionality of Flask routes in `main.py` and how they are referenced or called using JavaScript or HTML templates in the project.
+## 3. `checkCol(currentRow, col, value)`
+- **Definition**:
+  ```javascript
+  function checkCol(currentRow, col, value) {
+      for (let row = 0; row < 9; row++) {
+          if (document.getElementById("boxR" + row + "C" + col).innerText == value && currentRow != row) {
+              return true;
+          }
+      }
+      return false;
+  }
+  ```
+- **Purpose**: Checks for duplicate entries in the same column in the Sudoku grid.
+
+---
+
+## 4. `checkBox(currentRow, currentCol, value)`
+- **Definition**:
+  ```javascript
+  function checkBox(currentRow, currentCol, value) {
+      const boxStartRow = Math.floor(currentRow / 3) * 3;
+      const boxStartCol = Math.floor(currentCol / 3) * 3;
+      for (let row = boxStartRow; row < boxStartRow + 3; row++) {
+          for (let col = boxStartCol; col < boxStartCol + 3; col++) {
+              if (document.getElementById("boxR" + row + "C" + col).innerText == value && currentCol != col && currentRow != row) {
+                  return true;
+              }
+          }
+      }
+      return false;
+  }
+  ```
+- **Purpose**: Ensures no duplicates exist within the local 3x3 sub-grid of the Sudoku.
+
+---
+
+## 5. `checkFinished(puzzle_id)`
+- **Definition**:
+  ```javascript
+  function checkFinished(puzzle_id) {
+      for (let row = 0; row < 9; row++) {
+          for (let col = 0; col < 9; col++) {
+              // Checks each square to ensure all match the solution.
+          }
+      }
+  }
+  ```
+- **Purpose**: Determines whether the Sudoku puzzle is completely and correctly solved and triggers backend updates.
+
+---
+
+**Note**: The `script.js` file referenced in this export may contain additional functions or further details not captured here, as the results are limited. You can view more results [here on GitHub](https://github.com/laura-james/FlaskBoardGame/blob/b952610674e80612d654b1abf7b1b8d5266c3d2f/static/script.js).
