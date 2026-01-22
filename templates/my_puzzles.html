@@ -1,0 +1,13 @@
+{% extends 'base.html' %} 
+{% block content %}
+
+<h2>My Puzzles</h2>
+
+{%for p in puzzles%}
+    <a href='do_puzzle/{{p["puzzle_id"]}}' class='puzzle_link'><div class='puzzle_block finished{{p["isFinished"]}}' >
+        <p>Puzzle {{p["puzzle_id"]}}</p>
+        <p>Difficulty {{p["difficulty"]}}</p>
+        <p>isFinished {{p["isFinished"]}}</p>
+    </div></a>
+{%endfor%}
+{% endblock %}

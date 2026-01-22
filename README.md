@@ -8,6 +8,7 @@ Can be found online here on render.com [https://flaskboardgame.onrender.com/]
 * BIG CHANGE - Add a new field into the db for each puzzle (called `attempt_json`) That should be the field that gets updated when the user saves. When the puzzle is loaded it should use puzzle_json as normal to decide if the boxes are editable not editable but use the `attempt_json` to read in the values. This will allow users to change what they have added. DONE
 * Update hint number using jscript when you accept a hint? (Low priority as the page works when refreshed) DONE
 * Check if the puzzle has been completed - and set isFinished to True (or 1) I guess after each character entered it should run a program to check if the game array is the same as the solution array. If it is it should set setFinished to True and show a message to the user DONE
+* Build the list page for puzzles (should be easy with a sql statement to get all users pazzles then loop through and display links to each)
 * Create a scoreboard or scoring system for The user based on completed puzzles and number of hints 
 * Cant remember what your algorithm was but something like
     * Easy puzzle = 10 point minus hints
@@ -15,4 +16,5 @@ Can be found online here on render.com [https://flaskboardgame.onrender.com/]
     * write the SQL select statement to get that out of the db tables
 * Create a login form and a register form 
 * Look into sessions in order to remember the user ID between different pages (slide 27-31 here)
+* BUG - at the moment if you type in an incorrect value it goes red (if there's a match in that row or column or box) However when you save the game and reload the puzzle it loses the red colour - suggest when it loads there is a check to see if any of the squares cause errors?
 

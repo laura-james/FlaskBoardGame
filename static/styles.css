@@ -117,3 +117,23 @@ border-right: 4px solid black;
 .has-submenu:hover .submenu {
   display: block;
 }
+
+
+.puzzle_block{
+  border:1px solid red;
+  margin:5px;
+  padding: 5px; 
+  width:28%;
+  display: inline-grid;
+}
+
+.puzzle_block p{
+  padding: 0px;
+  margin:0px;
+}
+.puzzle_link{
+  text-decoration: none;
+}
+.finished1{
+  background-color:greenyellow;
+}

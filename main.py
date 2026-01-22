@@ -5,6 +5,7 @@ import os
 my_secret = os.environ['APININJA']
 
 
+
 import requests # used to get the sudoku puzzle from the api
 import os # used to store the api key in the operating system and not in plain site on github!
 import urllib3 # used to disable pesky ssl warnings
@@ -53,7 +54,7 @@ def puzzleadd(difficulty):
 
 @web_site.route('/do_puzzle/<puzzle_id>')
 def get_puzzle(puzzle_id):
-    user_id = 1 # chnage this when users can login!
+    user_id = 1 # change this when users can login!
     # Get the puzzle stored in the db using its puzzle id
     con = sqlite3.connect('sudoku.db')
     con.row_factory = sqlite3.Row #should get row as an associative array - so you can use table field names rather than array indexes
@@ -141,6 +142,26 @@ def get_num_hints(puzzle_id, user_id):
     for row in rows:
         print("Number of hints used for this puzzle:", row[0])
         return row[0]
+
+
+#======= MY PUZZLES ===========
+
+@web_site.route('/mypuzzles')
+def my_puzzles():
+    user_id = 1 # remember to change this!
+    con = sqlite3.connect('sudoku.db')
+    con.row_factory = sqlite3.Row #should get row as an associative array - so you can use table field names rather than array indexes
+    cursor = con.cursor()
+    sql = '''
+            SELECT * FROM puzzles WHERE user_id = ?
+            '''
+    cursor.execute(sql, (user_id,)) #the trailing comma IS important!
+    con.commit()
+    
+    puzzles = cursor.fetchall() 
+
+    con.close()   # Close the connection
+    return render_template("my_puzzles.html", puzzles = puzzles)
 
 # Could probably delete this now...
 
