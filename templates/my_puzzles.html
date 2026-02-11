@@ -3,11 +3,13 @@
 
 <h2>My Puzzles</h2>
 
-{%for p in puzzles%}
-    <a href='do_puzzle/{{p["puzzle_id"]}}' class='puzzle_link'><div class='puzzle_block finished{{p["isFinished"]}}' >
-        <p>Puzzle {{p["puzzle_id"]}}</p>
-        <p>Difficulty {{p["difficulty"]}}</p>
-        <p>isFinished {{p["isFinished"]}}</p>
+{% for i in range(puzzles| length)%}
+    <a href='do_puzzle/{{puzzles[i]["puzzle_id"]}}' class='puzzle_link'><div class='puzzle_block finished{{puzzles[i]["isFinished"]}}' >
+        <p>Puzzle {{puzzles[i]["puzzle_id"]}}</p>
+        <p>Difficulty {{puzzles[i]["difficulty"]}}</p>
+        <p>isFinished {{puzzles[i]["isFinished"]}}</p>
+        <p>num hints {{puzzles[i]["num_hints"]}}</p><!-- new !!! -->
+        <p>score {{scores[i]-puzzles[i]["num_hints"]}}</p>
     </div></a>
-{%endfor%}
+{% endfor %}
 {% endblock %}

@@ -26,7 +26,7 @@ async function checkSquare(row,col,puzzle_id){
         alert("congrats you have completed the puzzle! TODO - save puzzle and set isFinished to 1 - and what else...?")
         // TODO save puzzle and set isFinished to 1
         // Should the puzzle.....?
-        const response = await fetch('/puzzle_finished/'+puzzle_id);
+        const response = await fetch('/puzzle_finished/'+puzzle_id+'/1'); //TODO update user_id
         const result = await response.text();  
         console.log(result);
     }
@@ -72,6 +72,7 @@ function checkFinished(puzzle_id){
     // checks against the solution
     // returns false as soon as it finds a mismatch
     // if no mismatch found it returns true
+    console.log("hello!!!")
     for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
             let answer = document.querySelector(".solution_grid #boxR"+row+"C"+col).innerHTML;

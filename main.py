@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request,redirect
+from flask import Flask, render_template, request,redirect,session
+# NEW!!!!!!!
+from flask_session import Session 
+# END OF NEW!!!!!!!
 import sqlite3 # to connect to the database
 # you shouldn't store api keys in plain site so I have created a secret key and called it here
 import os
 my_secret = os.environ['APININJA']
-
-
 
 import requests # used to get the sudoku puzzle from the api
 import os # used to store the api key in the operating system and not in plain site on github!
@@ -12,12 +13,41 @@ import urllib3 # used to disable pesky ssl warnings
 # Disable the SSL warning
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import json 
-
+# NEW!!!!!!!
 web_site = Flask(__name__)
-
-@web_site.route('/')
+# Session Configuration 
+web_site.config["SESSION_PERMANENT"] = False     # Sessions expire when the browser is closed
+web_site.config["SESSION_TYPE"] = "filesystem"     # Store session data in files
+web_site.secret_key = "Super secret key"
+# END OF NEW!!!!!!!
+@web_site.route('/', methods=['GET','POST'])
 def home():
-    return render_template("home.html")
+    msg = ""
+    if request.args.get('msg') == "not_logged_in": #this is set when user has tried to open a page when not logged in
+        msg = "You must be logged in"
+    if request.method == "POST":
+        # user has attempted to login
+        name = request.form["name"];
+        password = request.form["password"];
+        # get user record from db
+        # Get the number of hints stored in the db using its puzzle id & user id
+        # con = sqlite3.connect('sudoku.db')
+        # con.row_factory = sqlite3.Row
+        # cursor = con.cursor()
+        # sql = 'SELECT * FROM users WHERE username = ? and password = ?'
+        # cursor.execute(sql, (name, password)) 
+        # con.commit()        
+        # rows = cursor.fetchall() 
+        # if len(rows)==1:
+        if name == "laura" and password == "cake": #TODO look these up from the db
+            session["name"] = name #set users name in the session
+            # session["user_id"] = rows[0]["user_id"] #set user_id in the session
+            return redirect('mypuzzles')
+        elif name == "" or password == "":
+            msg = "Please fill in both fields to login"
+        else:
+            msg = "Could not login"
+    return render_template("home.html", msg = msg, session = session)
 
 
 #add puzzle
@@ -28,21 +58,21 @@ def puzzleadd(difficulty):
     response = requests.get(api_url, headers={'X-Api-Key':my_secret }, verify=False)
     if response.status_code == requests.codes.ok:
         data = response.json()         # Parse JSON
-        puzzle = data['puzzle']        # Get just the "puzzle" key
-        solution = data['solution']        # Get the solution not using yet      
+        puzzle = data['puzzle']        # Get the "puzzle" 
+        solution = data['solution']    # Get the solution      
     else:
         print("Error:", response.status_code, response.text)
     
     # attempt to connect to the db
     con = sqlite3.connect('sudoku.db')
     # NEW added attempt_json
-    sql = "INSERT INTO puzzles(puzzle_json,solution_json,difficulty, isFinished,user_id,attempt_json) VALUES(?,?,?,?,?,?)"
+    sql = "INSERT INTO puzzles(puzzle_json, solution_json, difficulty, isFinished, user_id,attempt_json) VALUES(?,?,?,?,?,?)"
     cursor = con.cursor()
     # Convert to JSON strings
     puzzle_json_string = json.dumps(puzzle)
     solution_json_string = json.dumps(solution)
    
-    user_id = 1
+    user_id = 1 #CHANGE THIS!!
     cursor.execute(sql,(puzzle_json_string, solution_json_string, difficulty, 0,user_id, puzzle_json_string))
     con.commit()
     # Get the ID of the last inserted record
@@ -73,7 +103,7 @@ def get_puzzle(puzzle_id):
         attempt = json.loads(row["attempt_json"])
     con.close()   # Close the connection
     num_hints = get_num_hints(puzzle_id, user_id) # gets number of hints used for this puzzle
-    return render_template("suduko.html",puzzle_id = puzzle_id, puzzle = puzzle, solution = solution, num_hints = num_hints, attempt = attempt) 
+    return render_template("suduko.html",puzzle_id = puzzle_id, puzzle = puzzle, solution = solution, num_hints = num_hints, attempt = attempt , session = session) 
 
 
 #====================== GET HINT ==============================
@@ -115,16 +145,37 @@ def save_puzzle(puzzle_id):
 
     return "OK" # just return a simple string
 
-@web_site.route('/puzzle_finished/<int:puzzle_id>')
-def puzzle_finished(puzzle_id):
-    # Update the attempt_json in the puzzle record
+@web_site.route('/puzzle_finished/<int:puzzle_id>/<int:user_id>')
+def puzzle_finished(puzzle_id, user_id):
+    con = sqlite3.connect('sudoku.db')
+    con.row_factory = sqlite3.Row #should get row as an associative array - so you can use table field names rather than array indexes
+    cursor = con.cursor()
+    sql = '''
+            SELECT * FROM puzzles WHERE puzzle_id = ?
+            '''
+    cursor.execute(sql, (puzzle_id,)) #the trailing comma IS important! It tells  Python  that the brackets are defining a tuple even though its only one item
+    con.commit()
+    
+    rows = cursor.fetchall() 
+    for row in rows:
+        if row["difficulty"]=="easy":
+            score = 10
+        if row["difficulty"]=="medium":
+            score = 20
+        if row["difficulty"]=="hard":
+            score = 30
+    num_hints = get_num_hints(puzzle_id, user_id)
+    score = score - num_hints # subtract the number of hints used from the difficulty score to get the final score for the puzzle
+    con.close()
+    # update the puzzles table to store the score
+
     con = sqlite3.connect('sudoku.db')
     cursor = con.cursor()
-    sql = "UPDATE puzzles SET isFinished = 1 WHERE puzzle_id = ?"
-    cursor.execute(sql, (puzzle_id,))
+    sql = "UPDATE puzzles SET isFinished = 1, score = ? WHERE puzzle_id = ?"
+    cursor.execute(sql, (score, puzzle_id,))
     con.commit()
     con.close()
-
+    ## TODO SHOULD ALSO SAVE THE USERS GO AS WELL AS SET IS FINISHED!
     return "OK" # just return a simple string
 
 #======== GET NUM HINTS ========
@@ -143,25 +194,49 @@ def get_num_hints(puzzle_id, user_id):
         print("Number of hints used for this puzzle:", row[0])
         return row[0]
 
-
 #======= MY PUZZLES ===========
 
 @web_site.route('/mypuzzles')
 def my_puzzles():
+    print(session["name"]) #NEW print session name
+    print(session) #NEW print session array
+    if session["name"]==None:
+        #not logged in so redirect
+        return redirect('/?msg=not_logged_in')
+
     user_id = 1 # remember to change this!
     con = sqlite3.connect('sudoku.db')
     con.row_factory = sqlite3.Row #should get row as an associative array - so you can use table field names rather than array indexes
     cursor = con.cursor()
     sql = '''
-            SELECT * FROM puzzles WHERE user_id = ?
+            SELECT (SELECT COUNT(hint_id) FROM hints WHERE hints.puzzle_id = puzzles.puzzle_id and user_id = 1) AS num_hints,* FROM puzzles WHERE user_id = ?
             '''
     cursor.execute(sql, (user_id,)) #the trailing comma IS important!
     con.commit()
     
-    puzzles = cursor.fetchall() 
-
+    puzzles = cursor.fetchall()
+    # attempt at doing scores....?
+    scores = []
+    for puzz in puzzles:
+        if puzz["difficulty"]=="easy":
+            score = 10
+        if puzz["difficulty"]=="medium":
+            score = 15
+        if puzz["difficulty"]=="hard":
+            score = 20
+        if puzz["isFinished"] == 0:
+            score = 0
+        # then think about how to take off number of hints
+        scores.append(score)
     con.close()   # Close the connection
-    return render_template("my_puzzles.html", puzzles = puzzles)
+    return render_template("my_puzzles.html", puzzles = puzzles, scores = scores, session = session)
+
+#NEW!!!!!!
+@web_site.route("/logout")
+def logout():
+    # Clear the username from session
+    session["name"] = None
+    return redirect("/")
 
 # Could probably delete this now...
 

@@ -20,8 +20,16 @@
       <li><a href="/mypuzzles">My Puzzles</a></li>
       <li><a href="/leaderboard">Leaderboard</a></li>
       <li><a href="/tictactoe">Tic Tac Toe</a></li>
+      {% if session["name"]!=None %}
+        <li><a href="/logout">Log out</a></li>
+      {% else %}
+        <li><a href="/register">Register</a></li>
+      {% endif %}
     </ul>
-   
+    {% if session["name"]!= None %}
+      <p>Welcome back {{session["name"]}}</p>
+    {% endif %}
+
     
     {% block content %}{% endblock %}
 
