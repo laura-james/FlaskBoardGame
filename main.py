@@ -30,18 +30,17 @@ def home():
         name = request.form["name"];
         password = request.form["password"];
         # get user record from db
-        # Get the number of hints stored in the db using its puzzle id & user id
-        # con = sqlite3.connect('sudoku.db')
-        # con.row_factory = sqlite3.Row
-        # cursor = con.cursor()
-        # sql = 'SELECT * FROM users WHERE username = ? and password = ?'
-        # cursor.execute(sql, (name, password)) 
-        # con.commit()        
-        # rows = cursor.fetchall() 
-        # if len(rows)==1:
-        if name == "laura" and password == "cake": #TODO look these up from the db
+        con = sqlite3.connect('sudoku.db')
+        con.row_factory = sqlite3.Row
+        cursor = con.cursor()
+        sql = 'SELECT * FROM users WHERE username = ? and password = ?'
+        cursor.execute(sql, (name, password)) 
+        con.commit()        
+        rows = cursor.fetchall() 
+        if len(rows)==1:
+        # if name == "laura" and password == "cake": #TODO look these up from the db
             session["name"] = name #set users name in the session
-            # session["user_id"] = rows[0]["user_id"] #set user_id in the session
+            session["user_id"] = rows[0]["user_id"] #set user_id in the session
             return redirect('mypuzzles')
         elif name == "" or password == "":
             msg = "Please fill in both fields to login"
@@ -72,7 +71,8 @@ def puzzleadd(difficulty):
     puzzle_json_string = json.dumps(puzzle)
     solution_json_string = json.dumps(solution)
    
-    user_id = 1 #CHANGE THIS!!
+    #user_id = 1 #CHANGE THIS!!
+    user_id = session["user_id"]
     cursor.execute(sql,(puzzle_json_string, solution_json_string, difficulty, 0,user_id, puzzle_json_string))
     con.commit()
     # Get the ID of the last inserted record
@@ -84,7 +84,8 @@ def puzzleadd(difficulty):
 
 @web_site.route('/do_puzzle/<puzzle_id>')
 def get_puzzle(puzzle_id):
-    user_id = 1 # change this when users can login!
+   # user_id = 1 # change this when users can login!
+    user_id = session["user_id"]
     # Get the puzzle stored in the db using its puzzle id
     con = sqlite3.connect('sudoku.db')
     con.row_factory = sqlite3.Row #should get row as an associative array - so you can use table field names rather than array indexes
@@ -204,14 +205,15 @@ def my_puzzles():
         #not logged in so redirect
         return redirect('/?msg=not_logged_in')
 
-    user_id = 1 # remember to change this!
+    #user_id = 1 # remember to change this!
+    user_id = session["user_id"]
     con = sqlite3.connect('sudoku.db')
     con.row_factory = sqlite3.Row #should get row as an associative array - so you can use table field names rather than array indexes
     cursor = con.cursor()
     sql = '''
-            SELECT (SELECT COUNT(hint_id) FROM hints WHERE hints.puzzle_id = puzzles.puzzle_id and user_id = 1) AS num_hints,* FROM puzzles WHERE user_id = ?
+            SELECT (SELECT COUNT(hint_id) FROM hints WHERE hints.puzzle_id = puzzles.puzzle_id and user_id = ?) AS num_hints,* FROM puzzles WHERE user_id = ?
             '''
-    cursor.execute(sql, (user_id,)) #the trailing comma IS important!
+    cursor.execute(sql, (user_id,user_id)) 
     con.commit()
     
     puzzles = cursor.fetchall()
@@ -236,7 +238,36 @@ def my_puzzles():
 def logout():
     # Clear the username from session
     session["name"] = None
+    session["user_id"] = None
     return redirect("/")
+
+#NEW!!!!!!!!!!!!!!
+@web_site.route("/register",methods=['GET','POST'])
+def register():
+    msg = ""
+    if request.method == "POST":
+        # user has attempted to register
+        name = request.form["name"];
+        password = request.form["password"];
+        password2 = request.form["password2"];
+        ###### validation to go here!
+        if password != password2:
+            msg = "The passwords don't match"
+        # ADD OTHER VALIDATION HERE
+        else: 
+            # all validation is good so save user record in db
+            con = sqlite3.connect('sudoku.db')
+            cursor = con.cursor()
+            sql = 'INSERT INTO users (username,password) VALUES (?,?)'
+            cursor.execute(sql, (name, password)) 
+            con.commit()
+            print("user ",name," added to db")        
+            session["name"] = name #set users name in the session
+            # Get the ID of the last inserted record
+            session["user_id"]  = cursor.lastrowid
+            return redirect('mypuzzles')
+
+    return render_template("register.html",msg=msg)
 
 # Could probably delete this now...
 

@@ -3,9 +3,11 @@
 {{users}}
 <h2>Suduko</h2>
 <h3>Puzzle ID: {{puzzle_id}}</h3>
+<p>UserID: <span id="user_id_box">{{session["user_id"]}}</span></p>
 <h4>Difficulty:(add difficulty here)</h4>
 <p>Right click to use a hint for a cell!</p>
 <p>Hints used so far: <span id="num_hints">{{num_hints}}</span></p>
+
 <div class="puzzle_grid"><!--NEW!!!!-->
 {%for i in range(0,9) %}
     {% for j in range(0,9) %}

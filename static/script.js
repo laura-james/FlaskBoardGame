@@ -26,7 +26,8 @@ async function checkSquare(row,col,puzzle_id){
         alert("congrats you have completed the puzzle! TODO - save puzzle and set isFinished to 1 - and what else...?")
         // TODO save puzzle and set isFinished to 1
         // Should the puzzle.....?
-        const response = await fetch('/puzzle_finished/'+puzzle_id+'/1'); //TODO update user_id
+        user_id = document.getElementById("user_id_box").innerHTML;//get user_id from page
+        const response = await fetch('/puzzle_finished/'+puzzle_id+'/'+user_id); 
         const result = await response.text();  
         console.log(result);
     }
@@ -72,7 +73,6 @@ function checkFinished(puzzle_id){
     // checks against the solution
     // returns false as soon as it finds a mismatch
     // if no mismatch found it returns true
-    console.log("hello!!!")
     for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
             let answer = document.querySelector(".solution_grid #boxR"+row+"C"+col).innerHTML;
@@ -107,7 +107,8 @@ document.addEventListener('click', function() {
 });
 
 async function acceptHint(i, j, puzzle_id){
-    let user_id = 1; //TODO get this from the logged in user
+    //let user_id = 1; //TODO get this from the logged in user
+    user_id = document.getElementById("user_id_box").innerHTML;//get user_id from page
     const response = await fetch('/get_hint/'+ user_id+'/'+puzzle_id);
     const result = await response.text();  
     console.log(result);  // Prints the message that is returned from the get hint page
